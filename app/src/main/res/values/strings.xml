@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">MapApp</string>
     <string name="test">Test</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="following">Following</string>
+    <string name="follow">Follow</string>
+    <string name="permission_needed">Permission is needed for the application to function properly.</string>
+    <string name="ask_again">Ask again</string>
+    <string name="exit">Exit</string>
+    <string name="gps_needed">Gps is needed to specify your location.</string>
+    <string name="turn_on">Turn on</string>
 </resources>

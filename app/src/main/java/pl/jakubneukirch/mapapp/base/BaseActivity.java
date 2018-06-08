@@ -21,6 +21,8 @@ public abstract class BaseActivity<P extends MvpView, T extends BasePresenter<P>
 
     public abstract void injectDependencies();
 
+    public abstract void setupToolbar();
+
     @SuppressWarnings("unchecked")
     private void attachViewToPresenter() {
         presenter.attachView((P) this);
