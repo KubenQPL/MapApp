@@ -7,6 +7,8 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 
+import com.google.android.gms.maps.LocationSource;
+
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
@@ -91,5 +93,7 @@ public class LocationApi {
         public void onProviderEnabled(String provider) {
         }
     }
+
+
 
 }

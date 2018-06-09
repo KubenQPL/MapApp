@@ -23,7 +23,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     private final ArrayList<LocationDto> locations = new ArrayList<>();
 
     private Boolean following = false;
-    private Boolean isLocationSet = false;
+    private Location lastLocation = null;
+
+    private MapLocationSource mapLocationSource;
 
     @Inject
     public MainPresenter(LocationApi locationApi, MapRepository repository) {
@@ -52,20 +54,34 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void startLocationUpdates() {
+        if(mapLocationSource == null) {
+            setupMapLocationSource();
+        }
         view.showMyLocation();
         disposables.add(locationApi.getLocationObservable()
                 .doOnNext(this::updateLocation)
                 .subscribe());
     }
 
+    private void setupMapLocationSource() {
+        mapLocationSource = new MapLocationSource();
+    }
+
     private void updateLocation(Location location) {
-        if (!isLocationSet) {
-            view.setLocation(location);
-            isLocationSet = true;
-        }
+        mapLocationSource.updateLocation(location);
+        view.setLocation(location);
         if (following) {
+            if(locations.size() == 0){
+                if(lastLocation == null){
+                    lastLocation = location;
+                }
+                locations.add(new LocationDto(lastLocation.getLatitude(), lastLocation.getLongitude()));
+                view.drawPolyLine(lastLocation);
+            }
             locations.add(new LocationDto(location.getLatitude(), location.getLongitude()));
+            view.drawPolyLine(location);
         }
+        lastLocation = location;
     }
 
     void locationPermissionDenied() {
@@ -73,22 +89,20 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     void mapLoaded() {
+        view.setLocationSource(mapLocationSource);
         view.showMyLocation();
     }
 
     void followingEnded(long timestamp) {
         following = false;
         saveRoute(timestamp);
+        view.clearPolyLine();
     }
 
     private void saveRoute(long timestamp) {
         disposables.add(repository.insertRoute(new RouteDbEntity(timestamp))
-                .subscribeOn(
-                        Schedulers.io()
-                )
-                .observeOn(
-                        AndroidSchedulers.mainThread()
-                )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(this::saveLocations)
                 .subscribe());
     }

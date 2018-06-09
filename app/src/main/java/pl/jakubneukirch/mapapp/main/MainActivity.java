@@ -18,9 +18,16 @@ import android.widget.ToggleButton;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,6 +48,9 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     private GoogleMap map;
     private AlertDialog permissionDialog = null;
     private AlertDialog providerDialog = null;
+
+    private Polyline polyline = null;
+    private PolylineOptions polylineOptions = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,13 +148,47 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     public void showMyLocation() {
         if (map != null && isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
             map.setMyLocationEnabled(true);
+            updateCameraZoom();
         }
     }
 
     @Override
+    public void setLocationSource(LocationSource source) {
+        map.setLocationSource(source);
+    }
+
+    @Override
     public void setLocation(Location location) {
-        final CameraUpdate update = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
+        final LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+        final CameraUpdate update = CameraUpdateFactory.newLatLng(position);
+        updateCameraZoom();
         map.moveCamera(update);
+    }
+
+    @Override
+    public void drawPolyLine(Location location) {
+        if (polylineOptions == null) {
+            setupPolyLineOptions();
+        }
+        if (polyline != null) {
+            polyline.remove();
+        }
+        polylineOptions.add(new LatLng(location.getLatitude(), location.getLongitude()));
+        polyline = map.addPolyline(polylineOptions);
+    }
+
+    private void setupPolyLineOptions() {
+        polylineOptions = new PolylineOptions();
+        polylineOptions.color(R.color.route);
+        polylineOptions.width(5);
+        polylineOptions.visible(true);
+    }
+
+    @Override
+    public void clearPolyLine() {
+        polyline.remove();
+        polyline = null;
+        polylineOptions = null;
     }
 
     private void turnOnGps() {
@@ -173,8 +217,14 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
-        final CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
-        map.animateCamera(zoom);
+        map.getUiSettings().setScrollGesturesEnabled(false);
+        map.getUiSettings().setZoomControlsEnabled(false);
+        map.getUiSettings().setZoomGesturesEnabled(false);
         presenter.mapLoaded();
+    }
+
+    private void updateCameraZoom() {
+        final CameraUpdate zoom = CameraUpdateFactory.zoomTo(18);
+        map.animateCamera(zoom);
     }
 }
