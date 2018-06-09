@@ -11,5 +11,6 @@ import pl.jakubneukirch.mapapp.data.model.RouteDbEntity;
 @Database(entities = {LocationDbEntity.class, RouteDbEntity.class}, version = 1)
 public abstract class MapDatabase extends RoomDatabase {
     public abstract LocationDao locationDao();
+
     public abstract RouteDao routeDao();
 }

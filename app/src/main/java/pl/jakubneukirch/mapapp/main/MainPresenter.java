@@ -59,7 +59,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void updateLocation(Location location) {
-        if(!isLocationSet){
+        if (!isLocationSet) {
             view.setLocation(location);
             isLocationSet = true;
         }
