@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".main.MainActivity">
 
-    <include layout="@layout/standard_toolbar"/>
+    <include layout="@layout/map_toolbar"/>
 
     <fragment
         android:id="@+id/map"

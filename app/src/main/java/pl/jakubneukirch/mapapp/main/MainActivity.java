@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
+import android.widget.CompoundButton;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,8 +33,10 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     public static final int CODE_PERMISSION_FINE_LOCATION = 0;
 
-    @BindView(R.id.standardToolbar)
+    @BindView(R.id.mapToolbar)
     Toolbar standardToolbar;
+    @BindView(R.id.followToggleButton)
+    ToggleButton followToggleButton;
 
     private GoogleMap map;
     private AlertDialog permissionDialog = null;
@@ -46,16 +50,17 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        checkPermissions();
+    }
+
+    @Override
     public void setup() {
         ButterKnife.bind(this);
         setupToolbar();
         setupMap();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        checkPermissions();
+        setupListeners();
     }
 
     @Override
@@ -68,25 +73,31 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         mapFragment.getMapAsync(this);
     }
 
-    private void checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, CODE_PERMISSION_FINE_LOCATION);
+    private void setupListeners() {
+        followToggleButton.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
+            if (isChecked) {
+                presenter.followingBegun();
             } else {
-                presenter.locationPermissionGranted();
+                presenter.followingEnded();
             }
+        });
+    }
+
+    @SuppressLint("NewApi")
+    private void checkPermissions() {
+        if (!isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, CODE_PERMISSION_FINE_LOCATION);
         } else {
             presenter.locationPermissionGranted();
         }
     }
 
-    @Override
-    public void setLocation(Location location) {
-        final CameraUpdate latLng = CameraUpdateFactory
-                .newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
-        final CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
-        map.moveCamera(latLng);
-        map.animateCamera(zoom);
+    private Boolean isPermissionGranted(String permission) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return true;
+        }
     }
 
     @Override
@@ -125,7 +136,15 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @SuppressLint("MissingPermission")
     @Override
     public void showMyLocation() {
-        map.setMyLocationEnabled(true);
+        if (map != null && isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            map.setMyLocationEnabled(true);
+        }
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        final CameraUpdate update = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
+        map.moveCamera(update);
     }
 
     private void turnOnGps() {
@@ -154,5 +173,8 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
+        final CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
+        map.animateCamera(zoom);
+        presenter.mapLoaded();
     }
 }
