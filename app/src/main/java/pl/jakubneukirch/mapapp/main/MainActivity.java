@@ -21,11 +21,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -35,6 +31,7 @@ import pl.jakubneukirch.mapapp.R;
 import pl.jakubneukirch.mapapp.app.MapApp;
 import pl.jakubneukirch.mapapp.base.BaseActivity;
 import pl.jakubneukirch.mapapp.di.ActivityModule;
+import pl.jakubneukirch.mapapp.view.SpinnerButton;
 
 public class MainActivity extends BaseActivity<MainView, MainPresenter> implements MainView, OnMapReadyCallback {
 
@@ -44,6 +41,8 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     Toolbar standardToolbar;
     @BindView(R.id.followToggleButton)
     ToggleButton followToggleButton;
+    @BindView(R.id.spinnerButton)
+    SpinnerButton buttonMenu;
 
     private GoogleMap map;
     private AlertDialog permissionDialog = null;
@@ -71,6 +70,11 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         setupToolbar();
         setupMap();
         setupListeners();
+        setupButtonMenu();
+    }
+
+    private void setupButtonMenu() {
+        buttonMenu.setItems(new String[]{"Pierwsze", "Drugie"});
     }
 
     @Override
@@ -186,9 +190,11 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     @Override
     public void clearPolyLine() {
-        polyline.remove();
-        polyline = null;
-        polylineOptions = null;
+        if(polyline != null){
+            polyline.remove();
+            polyline = null;
+            polylineOptions = null;
+        }
     }
 
     private void turnOnGps() {

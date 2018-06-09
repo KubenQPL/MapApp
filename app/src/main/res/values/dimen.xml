@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="spinner_button_size">36dp</dimen>
+    <dimen name="padding_medium">8dp</dimen>
+    <dimen name="margin_medium">8dp</dimen>
+    <dimen name="spinner_item_text_size">20sp</dimen>
+</resources>

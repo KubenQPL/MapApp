@@ -9,4 +9,6 @@
     <string name="exit">Exit</string>
     <string name="gps_needed">Gps is needed to specify your location.</string>
     <string name="turn_on">Turn on</string>
+    <string name="map_screen">Map screen</string>
+    <string name="saved_routes_screen">Saved routes</string>
 </resources>

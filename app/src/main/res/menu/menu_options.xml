@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/mapScreen"
+        android:title="@string/map_screen"/>
+    <item android:id="@+id/savedRoutesScreen"
+        android:title="@string/saved_routes_screen"/>
+</menu>

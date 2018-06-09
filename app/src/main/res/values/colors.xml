@@ -4,5 +4,7 @@
     <color name="primaryDark">#303F9F</color>
     <color name="accent">#FF4081</color>
     <color name="white">#fff</color>
+    <color name="black">#000</color>
     <color name="route">#3F51B5</color>
+    <color name="spinner">#00B261</color>
 </resources>
