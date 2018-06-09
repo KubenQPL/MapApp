@@ -78,7 +78,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
             if (isChecked) {
                 presenter.followingBegun();
             } else {
-                presenter.followingEnded();
+                presenter.followingEnded(System.currentTimeMillis());
             }
         });
     }

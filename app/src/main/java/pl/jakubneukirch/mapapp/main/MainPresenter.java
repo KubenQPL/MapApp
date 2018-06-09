@@ -72,19 +72,23 @@ public class MainPresenter extends BasePresenter<MainView> {
         view.askForPermissions();
     }
 
-    void followingEnded() {
-        following = false;
-        saveRoute();
-    }
-
     void mapLoaded() {
         view.showMyLocation();
     }
 
-    private void saveRoute() {
-        disposables.add(repository.insertRoute(new RouteDbEntity(System.currentTimeMillis()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+    void followingEnded(long timestamp) {
+        following = false;
+        saveRoute(timestamp);
+    }
+
+    private void saveRoute(long timestamp) {
+        disposables.add(repository.insertRoute(new RouteDbEntity(timestamp))
+                .subscribeOn(
+                        Schedulers.io()
+                )
+                .observeOn(
+                        AndroidSchedulers.mainThread()
+                )
                 .doOnSuccess(this::saveLocations)
                 .subscribe());
     }

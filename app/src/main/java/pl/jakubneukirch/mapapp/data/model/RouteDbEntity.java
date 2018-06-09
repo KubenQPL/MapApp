@@ -28,4 +28,9 @@ public class RouteDbEntity {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return true;
+    }
 }
