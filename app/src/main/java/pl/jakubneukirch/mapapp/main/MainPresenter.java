@@ -37,6 +37,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void startLocationUpdates() {
+        view.showMyLocation();
         disposables.add(locationApi.getLocationObservable()
                 .doOnNext((Location location) -> view.setLocation(location))
                 .subscribe());

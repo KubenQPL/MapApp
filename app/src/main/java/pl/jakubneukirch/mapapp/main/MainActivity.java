@@ -1,6 +1,7 @@
 package pl.jakubneukirch.mapapp.main;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -119,6 +120,12 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
                     .create();
         }
         providerDialog.show();
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void showMyLocation() {
+        map.setMyLocationEnabled(true);
     }
 
     private void turnOnGps() {

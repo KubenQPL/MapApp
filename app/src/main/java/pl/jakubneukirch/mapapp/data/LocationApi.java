@@ -69,7 +69,7 @@ public final class LocationApi {
     class LocationListener implements android.location.LocationListener {
         private final ObservableEmitter<Location> emitter;
 
-        public LocationListener(ObservableEmitter<Location> emitter) {
+        LocationListener(ObservableEmitter<Location> emitter) {
             this.emitter = emitter;
         }
 
