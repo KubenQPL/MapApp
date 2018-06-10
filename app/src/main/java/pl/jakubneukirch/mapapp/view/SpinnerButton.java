@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatSpinner;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -25,9 +23,7 @@ public class SpinnerButton extends AppCompatSpinner {
     private boolean isExpanded = false;
     public String[] items = null;
     Point displaySize = new Point();
-
-    private Drawable upArrow;
-    private Drawable downArrow;
+    private OnItemSelectedListener onItemSelectedListener;
 
     public SpinnerButton(Context context) {
         super(context);
@@ -60,8 +56,7 @@ public class SpinnerButton extends AppCompatSpinner {
     }
 
     private void setup() {
-        upArrow = ContextCompat.getDrawable(getContext(), R.drawable.baseline_keyboard_arrow_up_white_36);
-        downArrow = ContextCompat.getDrawable(getContext(), R.drawable.baseline_keyboard_arrow_down_white_36);
+
     }
 
     public void setItems(String[] items) {
@@ -71,8 +66,23 @@ public class SpinnerButton extends AppCompatSpinner {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        getSelectedView().setVisibility(View.GONE);
+        if (getSelectedView() != null) {
+            getSelectedView().setVisibility(View.GONE);
+        }
         super.onDraw(canvas);
+    }
+
+    @Override
+    public void setOnItemSelectedListener(@Nullable OnItemSelectedListener listener) {
+        this.onItemSelectedListener = listener;
+    }
+
+    @Override
+    public void setSelection(int position) {
+        super.setSelection(position);
+        if (onItemSelectedListener != null) {
+            onItemSelectedListener.onItemSelected(null, null, position, 0);
+        }
     }
 
     @Override
@@ -88,7 +98,7 @@ public class SpinnerButton extends AppCompatSpinner {
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if(isExpanded && hasWindowFocus) {
+        if (isExpanded && hasWindowFocus) {
             performClose();
         }
     }
@@ -96,7 +106,7 @@ public class SpinnerButton extends AppCompatSpinner {
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
         final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
-        if(isExpanded) {
+        if (isExpanded) {
             mergeDrawableStates(drawableState, STATE_EXPANDED);
         }
         return drawableState;
@@ -105,7 +115,7 @@ public class SpinnerButton extends AppCompatSpinner {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        final Display display = ((WindowManager)getContext().getSystemService(Service.WINDOW_SERVICE)).getDefaultDisplay();
+        final Display display = ((WindowManager) getContext().getSystemService(Service.WINDOW_SERVICE)).getDefaultDisplay();
         display.getSize(displaySize);
         setDropDownWidth(displaySize.x);
     }

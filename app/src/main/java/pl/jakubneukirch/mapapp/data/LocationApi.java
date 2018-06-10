@@ -16,7 +16,7 @@ import io.reactivex.ObservableEmitter;
 
 public class LocationApi {
 
-    private static final long LOCATION_UPDATES_INTERVAL = 1000;
+    private static final long LOCATION_UPDATES_INTERVAL = 0;
     private static final float LOCATION_UPDATES_MIN_DISTANCE = 0f;
 
     private final LocationManager locationManager;

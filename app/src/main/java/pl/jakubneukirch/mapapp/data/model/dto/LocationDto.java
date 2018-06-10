@@ -1,4 +1,4 @@
-package pl.jakubneukirch.mapapp.data.dto;
+package pl.jakubneukirch.mapapp.data.model.dto;
 
 public class LocationDto {
     private long routeId;
@@ -38,5 +38,10 @@ public class LocationDto {
 
     public void setLon(double lon) {
         this.lon = lon;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (this.lat == ((LocationDto)obj).lat) && (this.lon == ((LocationDto)obj).lon);
     }
 }

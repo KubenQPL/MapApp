@@ -11,4 +11,9 @@
     <string name="turn_on">Turn on</string>
     <string name="map_screen">Map screen</string>
     <string name="saved_routes_screen">Saved routes</string>
+    <string name="points">Points: %d</string>
+    <string-array name="spinner_screens">
+        <item>Current localization</item>
+        <item>Saved routes</item>
+    </string-array>
 </resources>

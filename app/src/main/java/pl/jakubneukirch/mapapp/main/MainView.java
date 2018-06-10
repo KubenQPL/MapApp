@@ -22,4 +22,6 @@ public interface MainView extends MvpView {
     void showMyLocation();
 
     void setLocationSource(LocationSource source);
+
+    void openSavedScreen();
 }

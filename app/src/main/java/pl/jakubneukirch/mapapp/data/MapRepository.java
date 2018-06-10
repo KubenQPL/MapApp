@@ -7,19 +7,23 @@ import javax.inject.Inject;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
-import pl.jakubneukirch.mapapp.data.dao.LocationDao;
-import pl.jakubneukirch.mapapp.data.dao.RouteDao;
-import pl.jakubneukirch.mapapp.data.model.LocationDbEntity;
-import pl.jakubneukirch.mapapp.data.model.RouteDbEntity;
+import pl.jakubneukirch.mapapp.data.model.dao.LocationDao;
+import pl.jakubneukirch.mapapp.data.model.dao.RouteDao;
+import pl.jakubneukirch.mapapp.data.model.dao.RouteLocationsDao;
+import pl.jakubneukirch.mapapp.data.model.db.RouteLocationsDbEntity;
+import pl.jakubneukirch.mapapp.data.model.db.LocationDbEntity;
+import pl.jakubneukirch.mapapp.data.model.db.RouteDbEntity;
 
 public class MapRepository {
     private final LocationDao locationDao;
     private final RouteDao routeDao;
+    private final RouteLocationsDao routeLocationsDao;
 
     @Inject
-    public MapRepository(LocationDao locationDao, RouteDao routeDao) {
+    public MapRepository(LocationDao locationDao, RouteDao routeDao, RouteLocationsDao routeLocationsDao) {
         this.locationDao = locationDao;
         this.routeDao = routeDao;
+        this.routeLocationsDao = routeLocationsDao;
     }
 
     public Completable insertLocation(LocationDbEntity location) {
@@ -42,6 +46,10 @@ public class MapRepository {
 
     public Single<List<RouteDbEntity>> getAllRoutes() {
         return routeDao.getAllRoutes();
+    }
+
+    public Single<List<RouteLocationsDbEntity>> getAllRoutesWithLocations() {
+        return routeLocationsDao.getRoutesWithLocations();
     }
 
 }

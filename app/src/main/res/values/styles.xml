@@ -23,4 +23,12 @@
         <item name="android:height">@dimen/spinner_button_size</item>
     </style>
 
+    <style name="AppTheme.TextView" parent="TextAppearance.AppCompat">
+    </style>
+
+    <style name="AppTheme.TextView.RecyclerItem" parent="AppTheme.TextView">
+        <item name="android:textSize">@dimen/recycler_item_text_size</item>
+        <item name="android:textColor">@color/grey</item>
+    </style>
+
 </resources>

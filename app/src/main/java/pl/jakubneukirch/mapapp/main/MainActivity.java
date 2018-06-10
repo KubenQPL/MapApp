@@ -12,6 +12,9 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.ToggleButton;
 
@@ -31,6 +34,7 @@ import pl.jakubneukirch.mapapp.R;
 import pl.jakubneukirch.mapapp.app.MapApp;
 import pl.jakubneukirch.mapapp.base.BaseActivity;
 import pl.jakubneukirch.mapapp.di.ActivityModule;
+import pl.jakubneukirch.mapapp.saved.SavedActivity;
 import pl.jakubneukirch.mapapp.view.SpinnerButton;
 
 public class MainActivity extends BaseActivity<MainView, MainPresenter> implements MainView, OnMapReadyCallback {
@@ -42,7 +46,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @BindView(R.id.followToggleButton)
     ToggleButton followToggleButton;
     @BindView(R.id.spinnerButton)
-    SpinnerButton buttonMenu;
+    SpinnerButton spinnerButton;
 
     private GoogleMap map;
     private AlertDialog permissionDialog = null;
@@ -70,11 +74,29 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         setupToolbar();
         setupMap();
         setupListeners();
-        setupButtonMenu();
+        setupSpinnerButton();
     }
 
-    private void setupButtonMenu() {
-        buttonMenu.setItems(new String[]{"Pierwsze", "Drugie"});
+    private void setupSpinnerButton() {
+        spinnerButton.setItems(getResources().getStringArray(R.array.spinner_screens));
+        spinnerButton.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("Click", "position: " + position);
+                presenter.onItemScreenSelected(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    @Override
+    public void openSavedScreen() {
+        final Intent intent = new Intent(this, SavedActivity.class);
+        startActivity(intent);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package pl.jakubneukirch.mapapp.main;
 
-import android.location.Location;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -11,15 +9,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import pl.jakubneukirch.mapapp.RxSchedulersOverrideRule;
 import pl.jakubneukirch.mapapp.data.LocationApi;
 import pl.jakubneukirch.mapapp.data.MapRepository;
-import pl.jakubneukirch.mapapp.data.model.RouteDbEntity;
+import pl.jakubneukirch.mapapp.data.model.db.RouteDbEntity;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;

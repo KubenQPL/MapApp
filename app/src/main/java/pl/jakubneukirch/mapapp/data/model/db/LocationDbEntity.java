@@ -1,10 +1,10 @@
-package pl.jakubneukirch.mapapp.data.model;
+package pl.jakubneukirch.mapapp.data.model.db;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
-import pl.jakubneukirch.mapapp.data.dto.LocationDto;
+import pl.jakubneukirch.mapapp.data.model.dto.LocationDto;
 
 @Entity(tableName = "locations")
 public class LocationDbEntity {

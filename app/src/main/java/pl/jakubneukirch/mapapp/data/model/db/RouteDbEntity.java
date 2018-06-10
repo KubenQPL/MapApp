@@ -1,4 +1,4 @@
-package pl.jakubneukirch.mapapp.data.model;
+package pl.jakubneukirch.mapapp.data.model.db;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;

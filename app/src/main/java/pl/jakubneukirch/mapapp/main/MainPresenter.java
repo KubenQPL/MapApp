@@ -11,11 +11,14 @@ import io.reactivex.schedulers.Schedulers;
 import pl.jakubneukirch.mapapp.base.BasePresenter;
 import pl.jakubneukirch.mapapp.data.LocationApi;
 import pl.jakubneukirch.mapapp.data.MapRepository;
-import pl.jakubneukirch.mapapp.data.dto.LocationDto;
-import pl.jakubneukirch.mapapp.data.model.LocationDbEntity;
-import pl.jakubneukirch.mapapp.data.model.RouteDbEntity;
+import pl.jakubneukirch.mapapp.data.model.db.LocationDbEntity;
+import pl.jakubneukirch.mapapp.data.model.db.RouteDbEntity;
+import pl.jakubneukirch.mapapp.data.model.dto.LocationDto;
 
 public class MainPresenter extends BasePresenter<MainView> {
+
+    private static final int MAIN_ACTIVITY_POSITION = 0;
+    private static final int SAVED_ACTIVITY_POSITION = 1;
 
     private final LocationApi locationApi;
     private final MapRepository repository;
@@ -54,7 +57,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void startLocationUpdates() {
-        if(mapLocationSource == null) {
+        if (mapLocationSource == null) {
             setupMapLocationSource();
         }
         view.showMyLocation();
@@ -71,17 +74,27 @@ public class MainPresenter extends BasePresenter<MainView> {
         mapLocationSource.updateLocation(location);
         view.setLocation(location);
         if (following) {
-            if(locations.size() == 0){
-                if(lastLocation == null){
+            if (locations.size() == 0) {
+                if (lastLocation == null) {
                     lastLocation = location;
                 }
-                locations.add(new LocationDto(lastLocation.getLatitude(), lastLocation.getLongitude()));
+                addLocation(new LocationDto(lastLocation.getLatitude(), lastLocation.getLongitude()));
                 view.drawPolyLine(lastLocation);
             }
-            locations.add(new LocationDto(location.getLatitude(), location.getLongitude()));
+            addLocation(new LocationDto(location.getLatitude(), location.getLongitude()));
             view.drawPolyLine(location);
         }
         lastLocation = location;
+    }
+
+    private void addLocation(LocationDto location) {
+        if (locations.size() > 0) {
+            if (!locations.get(locations.size() - 1).equals(location)) {
+                locations.add(location);
+            }
+        } else {
+            locations.add(location);
+        }
     }
 
     void locationPermissionDenied() {
@@ -123,5 +136,11 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     void followingBegun() {
         following = true;
+    }
+
+    public void onItemScreenSelected(int position) {
+        if (position == SAVED_ACTIVITY_POSITION) {
+            view.openSavedScreen();
+        }
     }
 }

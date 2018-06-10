@@ -11,8 +11,9 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import pl.jakubneukirch.mapapp.data.MapDatabase;
-import pl.jakubneukirch.mapapp.data.dao.LocationDao;
-import pl.jakubneukirch.mapapp.data.dao.RouteDao;
+import pl.jakubneukirch.mapapp.data.model.dao.LocationDao;
+import pl.jakubneukirch.mapapp.data.model.dao.RouteDao;
+import pl.jakubneukirch.mapapp.data.model.dao.RouteLocationsDao;
 
 @Module
 public class AppModule {
@@ -51,5 +52,11 @@ public class AppModule {
     @Singleton
     RouteDao providesRouteDao(MapDatabase database) {
         return database.routeDao();
+    }
+
+    @Provides
+    @Singleton
+    RouteLocationsDao providesRouteLocationsDao(MapDatabase database) {
+        return database.routeLocationsDao();
     }
 }
