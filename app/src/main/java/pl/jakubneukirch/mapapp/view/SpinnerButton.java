@@ -3,13 +3,13 @@ package pl.jakubneukirch.mapapp.view;
 import android.app.Service;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.PorterDuff;
+import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.AppCompatSpinner;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -19,7 +19,15 @@ import pl.jakubneukirch.mapapp.R;
 
 public class SpinnerButton extends AppCompatSpinner {
 
+    private static final int SPINNER_STYLE = R.style.AppTheme_Spinner;
+    private static final int[] STATE_EXPANDED = {R.attr.state_expanded};
+
+    private boolean isExpanded = false;
     public String[] items = null;
+    Point displaySize = new Point();
+
+    private Drawable upArrow;
+    private Drawable downArrow;
 
     public SpinnerButton(Context context) {
         super(context);
@@ -52,7 +60,8 @@ public class SpinnerButton extends AppCompatSpinner {
     }
 
     private void setup() {
-
+        upArrow = ContextCompat.getDrawable(getContext(), R.drawable.baseline_keyboard_arrow_up_white_36);
+        downArrow = ContextCompat.getDrawable(getContext(), R.drawable.baseline_keyboard_arrow_down_white_36);
     }
 
     public void setItems(String[] items) {
@@ -67,9 +76,41 @@ public class SpinnerButton extends AppCompatSpinner {
     }
 
     @Override
+    public boolean performClick() {
+        isExpanded = true;
+        return super.performClick();
+    }
+
+    public void performClose() {
+        isExpanded = false;
+        refreshDrawableState();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        if(isExpanded && hasWindowFocus) {
+            performClose();
+        }
+    }
+
+    @Override
+    protected int[] onCreateDrawableState(int extraSpace) {
+        final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
+        if(isExpanded) {
+            mergeDrawableStates(drawableState, STATE_EXPANDED);
+        }
+        return drawableState;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Display display = ((WindowManager)getContext().getSystemService(Service.WINDOW_SERVICE)).getDefaultDisplay();
-        setDropDownWidth(display.getWidth());
+        final Display display = ((WindowManager)getContext().getSystemService(Service.WINDOW_SERVICE)).getDefaultDisplay();
+        display.getSize(displaySize);
+        setDropDownWidth(displaySize.x);
+    }
+
+    public void setExpanded(boolean expanded) {
+        isExpanded = expanded;
     }
 }

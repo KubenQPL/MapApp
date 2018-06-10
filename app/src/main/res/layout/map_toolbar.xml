@@ -11,13 +11,9 @@
 
         <pl.jakubneukirch.mapapp.view.SpinnerButton
             android:id="@+id/spinnerButton"
+            style="@style/AppTheme.Spinner"
             android:layout_marginStart="@dimen/margin_medium"
-            android:layout_gravity="center_vertical"
-            android:overlapAnchor="false"
-            android:background="@color/spinner"
-            android:foreground="@drawable/baseline_keyboard_arrow_down_white_36"
-            android:layout_width="@dimen/spinner_button_size"
-            android:layout_height="@dimen/spinner_button_size"/>
+            android:layout_gravity="center_vertical"/>
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/mapToolbar"
