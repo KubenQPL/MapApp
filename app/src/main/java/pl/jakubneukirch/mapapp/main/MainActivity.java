@@ -82,14 +82,11 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         spinnerButton.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("Click", "position: " + position);
                 presenter.onItemScreenSelected(position);
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
 

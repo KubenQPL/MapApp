@@ -17,8 +17,8 @@ import pl.jakubneukirch.mapapp.data.model.dto.LocationDto;
 
 public class MainPresenter extends BasePresenter<MainView> {
 
-    private static final int MAIN_ACTIVITY_POSITION = 0;
-    private static final int SAVED_ACTIVITY_POSITION = 1;
+    public static final int MAIN_ACTIVITY_POSITION = 0;
+    public static final int SAVED_ACTIVITY_POSITION = 1;
 
     private final LocationApi locationApi;
     private final MapRepository repository;

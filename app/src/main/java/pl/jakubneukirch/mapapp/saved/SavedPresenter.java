@@ -13,6 +13,8 @@ import pl.jakubneukirch.mapapp.data.MapRepository;
 import pl.jakubneukirch.mapapp.data.model.db.RouteLocationsDbEntity;
 import pl.jakubneukirch.mapapp.data.model.dto.RouteDto;
 
+import static pl.jakubneukirch.mapapp.main.MainPresenter.MAIN_ACTIVITY_POSITION;
+
 public class SavedPresenter extends BasePresenter<SavedView> {
 
     private MapRepository repository;
@@ -25,6 +27,12 @@ public class SavedPresenter extends BasePresenter<SavedView> {
     void onCreate() {
         view.setup();
         loadRoutes();
+    }
+
+    void onItemScreenSelected(int position) {
+        if(position == MAIN_ACTIVITY_POSITION){
+            view.goBack();
+        }
     }
 
     private void loadRoutes() {
