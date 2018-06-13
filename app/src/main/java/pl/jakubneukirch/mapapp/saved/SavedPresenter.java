@@ -24,12 +24,12 @@ public class SavedPresenter extends BasePresenter<SavedView> {
         this.repository = repository;
     }
 
-    void onCreate() {
+    public void onCreate() {
         view.setup();
         loadRoutes();
     }
 
-    void onItemScreenSelected(int position) {
+    public void onItemScreenSelected(int position) {
         if(position == MAIN_ACTIVITY_POSITION){
             view.goBack();
         }

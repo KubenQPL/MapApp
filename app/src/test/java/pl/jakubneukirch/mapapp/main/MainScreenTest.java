@@ -17,6 +17,7 @@ import pl.jakubneukirch.mapapp.data.MapRepository;
 import pl.jakubneukirch.mapapp.data.model.db.RouteDbEntity;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,7 +84,7 @@ public class MainScreenTest {
     }
 
     @Test
-    public void shouldObserveLocationProviderSet() {
+    public void shouldObserveLocationWithProviderSet() {
         when(locationApi.isProviderSet()).thenReturn(true);
         when(locationApi.getLocationObservable()).thenReturn(Observable.empty());
 
@@ -115,5 +116,19 @@ public class MainScreenTest {
         presenter.followingEnded(timestamp);
 
         verify(repository).insertRoute(route);
+    }
+
+    @Test
+    public void shouldOpenSavedScreen() {
+        presenter.onItemScreenSelected(MainPresenter.SAVED_ACTIVITY_POSITION);
+
+        verify(view).openSavedScreen();
+    }
+
+    @Test
+    public void shouldDoNothing() {
+        presenter.onItemScreenSelected(MainPresenter.MAIN_ACTIVITY_POSITION);
+
+        verify(view, never()).openSavedScreen();
     }
 }
