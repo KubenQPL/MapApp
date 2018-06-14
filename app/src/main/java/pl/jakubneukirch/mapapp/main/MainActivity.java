@@ -374,9 +374,9 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     public void showPlaces(ArrayList<PlaceDetails> places) {
         if (infoDialog == null) {
             infoDialog = new InfoDialog(this);
+            infoDialog.setCancelable(true);
         }
         infoDialog.setInfo(places);
-        infoDialog.setCancelable(true);
         infoDialog.show();
     }
 
