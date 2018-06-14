@@ -20,7 +20,6 @@ public class MapsStaticApiUtils {
         LocationDbEntity location;
         for (int i = 0; i < locations.size(); i++) {
             location = locations.get(i);
-            Log.d("loc", location.getRouteId() + " " + location.getLat() + " " + location.getLon());
             builder.append(location.getLat());
             builder.append(",");
             builder.append(location.getLon());

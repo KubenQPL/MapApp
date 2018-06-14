@@ -261,7 +261,6 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     private void setCameraPosition(LatLng position) {
         if(map != null){
-            Log.d("location", position.toString());
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(position, CAMERA_ZOOM);
             map.animateCamera(update);
         }
