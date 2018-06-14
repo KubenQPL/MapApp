@@ -24,13 +24,27 @@
             android:layout_height="wrap_content">
 
 
-            <ToggleButton
-                android:id="@+id/followToggleButton"
+            <LinearLayout
+                android:id="@+id/toggleLayout"
+                android:orientation="horizontal"
                 android:layout_gravity="end|center_vertical"
-                android:textOn="@string/following"
-                android:textOff="@string/follow"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="match_parent">
+                
+                <TextView
+                    android:id="@+id/followingStatusTextView"
+                    android:text="@string/follow"
+                    style="@style/AppTheme.TextView.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/followToggleButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
 
         </android.support.v7.widget.Toolbar>
 

@@ -2,15 +2,15 @@ package pl.jakubneukirch.mapapp.data.model.dto;
 
 public class LocationDto {
     private long routeId;
-    private double lat;
-    private double lon;
+    private float lat;
+    private float lon;
 
-    public LocationDto(double lat, double lon) {
+    public LocationDto(float lat, float lon) {
         this.lat = lat;
         this.lon = lon;
     }
 
-    public LocationDto(long routeId, double lat, double lon) {
+    public LocationDto(long routeId, float lat, float lon) {
         this.routeId = routeId;
         this.lat = lat;
         this.lon = lon;
@@ -24,24 +24,24 @@ public class LocationDto {
         this.routeId = routeId;
     }
 
-    public double getLat() {
+    public float getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
+    public void setLat(float lat) {
         this.lat = lat;
     }
 
-    public double getLon() {
+    public float getLon() {
         return lon;
     }
 
-    public void setLon(double lon) {
+    public void setLon(float lon) {
         this.lon = lon;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return (this.lat == ((LocationDto)obj).lat) && (this.lon == ((LocationDto)obj).lon);
+        return (this.lat == ((LocationDto) obj).lat) && (this.lon == ((LocationDto) obj).lon);
     }
 }

@@ -7,8 +7,6 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 
-import com.google.android.gms.maps.LocationSource;
-
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
@@ -45,6 +43,7 @@ public class LocationApi {
     private void setupLocationObservable() {
         locationObservable = Observable.create((ObservableEmitter<Location> emitter) -> {
             LocationListener listener = new LocationListener(emitter);
+            locationManager.requestSingleUpdate(provider.getName(), listener, null);
             locationManager.requestLocationUpdates(
                     provider.getName(),
                     LOCATION_UPDATES_INTERVAL,
@@ -52,6 +51,14 @@ public class LocationApi {
                     listener
             );
         });
+    }
+
+    @SuppressLint("MissingPermission")
+    public Location getLastKnownLocation() {
+        if(provider != null){
+            return locationManager.getLastKnownLocation(provider.getName());
+        }
+        return null;
     }
 
     public Observable<Location> getLocationObservable() {
@@ -77,7 +84,9 @@ public class LocationApi {
 
         @Override
         public void onLocationChanged(Location location) {
-            emitter.onNext(location);
+            if (location != null) {
+                emitter.onNext(location);
+            }
         }
 
         @Override
@@ -93,7 +102,6 @@ public class LocationApi {
         public void onProviderEnabled(String provider) {
         }
     }
-
 
 
 }

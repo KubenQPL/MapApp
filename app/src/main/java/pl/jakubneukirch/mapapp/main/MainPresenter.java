@@ -1,19 +1,25 @@
 package pl.jakubneukirch.mapapp.main;
 
 import android.location.Location;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import pl.jakubneukirch.mapapp.base.BasePresenter;
 import pl.jakubneukirch.mapapp.data.LocationApi;
 import pl.jakubneukirch.mapapp.data.MapRepository;
+import pl.jakubneukirch.mapapp.data.model.api.PlaceDetails;
 import pl.jakubneukirch.mapapp.data.model.db.LocationDbEntity;
 import pl.jakubneukirch.mapapp.data.model.db.RouteDbEntity;
 import pl.jakubneukirch.mapapp.data.model.dto.LocationDto;
+
+import static pl.jakubneukirch.mapapp.main.MainActivity.NO_ROUTE_ID;
 
 public class MainPresenter extends BasePresenter<MainView> {
 
@@ -28,7 +34,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     private Boolean following = false;
     private Location lastLocation = null;
 
-    private MapLocationSource mapLocationSource;
+    private MapLocationSource mapLocationSource = new MapLocationSource();
+    private long routeId;
+    private List<LocationDbEntity> routeLocations = null;
 
     @Inject
     public MainPresenter(LocationApi locationApi, MapRepository repository) {
@@ -36,12 +44,47 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.repository = repository;
     }
 
-    void onCreate() {
+    void onCreate(long routeId) {
+        this.routeId = routeId;
         view.setup();
+        if (routeId != NO_ROUTE_ID) {
+            loadRoute();
+            view.setupInfoToolbar();
+        } else {
+            view.setupFollowingToolbar();
+        }
+    }
+
+    private void loadRoute() {
+        disposables.add(
+                repository.getRouteLocations(routeId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSuccess(this::setupRoute)
+                        .subscribe()
+        );
+    }
+
+    private void setupRoute(List<LocationDbEntity> list) {
+        this.routeLocations = list;
+        updateRouteLocation();
+        drawRoute(list);
+    }
+
+    private void updateRouteLocation() {
+        if (routeLocations != null && routeLocations.size() > 0) {
+            view.setLocation(routeLocations.get(0));
+        }
+    }
+
+    private void drawRoute(List<LocationDbEntity> list) {
+        view.drawPath(list);
     }
 
     void locationPermissionGranted() {
-        setupLocationApi();
+        if (routeId == NO_ROUTE_ID) {
+            setupLocationApi();
+        }
     }
 
     private void setupLocationApi() {
@@ -57,17 +100,18 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void startLocationUpdates() {
-        if (mapLocationSource == null) {
-            setupMapLocationSource();
-        }
-        view.showMyLocation();
+        showMyLocation();
         disposables.add(locationApi.getLocationObservable()
                 .doOnNext(this::updateLocation)
                 .subscribe());
     }
 
-    private void setupMapLocationSource() {
-        mapLocationSource = new MapLocationSource();
+    private void showMyLocation() {
+        Location location = locationApi.getLastKnownLocation();
+        view.showMyLocation((routeId == NO_ROUTE_ID));
+        if (location != null) {
+            updateLocation(location);
+        }
     }
 
     private void updateLocation(Location location) {
@@ -78,16 +122,16 @@ public class MainPresenter extends BasePresenter<MainView> {
                 if (lastLocation == null) {
                     lastLocation = location;
                 }
-                addLocation(new LocationDto(lastLocation.getLatitude(), lastLocation.getLongitude()));
+                addLocation(new LocationDto((float) lastLocation.getLatitude(), (float) lastLocation.getLongitude()));
                 view.drawPolyLine(lastLocation);
             }
-            addLocation(new LocationDto(location.getLatitude(), location.getLongitude()));
+            addLocation(new LocationDto((float) location.getLatitude(), (float) location.getLongitude()));
             view.drawPolyLine(location);
         }
         lastLocation = location;
     }
 
-    private void addLocation(LocationDto location) {
+    void addLocation(LocationDto location) {
         if (locations.size() > 0) {
             if (!locations.get(locations.size() - 1).equals(location)) {
                 locations.add(location);
@@ -101,23 +145,68 @@ public class MainPresenter extends BasePresenter<MainView> {
         view.askForPermissions();
     }
 
-    void mapLoaded() {
-        view.setLocationSource(mapLocationSource);
-        view.showMyLocation();
+    void infoItemClicked() {
+        if (routeLocations != null && routeLocations.size() > 1) {
+            loadRoutePlaces(routeLocations.get(0), routeLocations.get(routeLocations.size() - 1));
+        }
     }
 
-    void followingEnded(long timestamp) {
+    private void loadRoutePlaces(LocationDbEntity locationStart, LocationDbEntity locationEnd) {
+        ArrayList<PlaceDetails> places = new ArrayList<>();
+
+        disposables.add(
+                getRoutePlaceSingle(locationStart)
+                        .concatWith(getRoutePlaceSingle(locationEnd)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread()))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnNext(places::add)
+                        .doOnComplete(() -> view.showPlaces(places))
+                        .doOnError((error) -> Log.d("error", error.getMessage() + ""))
+                        .subscribe()
+        );
+    }
+
+    private Single<PlaceDetails> getRoutePlaceSingle(LocationDbEntity location) {
+        return repository.getNearbyPlaces(location.getLat(), location.getLon())
+                .subscribeOn(Schedulers.io())
+                .flatMap((nearbyPlacesSearch) -> {
+                    if (nearbyPlacesSearch.getResults().size() > 0) {
+                        return repository.getPlaceDetails(nearbyPlacesSearch.getResults().get(0).getPlaceId());
+                    }
+                    return Single.just(PlaceDetails.empty());
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    void mapLoaded() {
+        if (routeId == NO_ROUTE_ID) {
+            view.setupStaticMap();
+        } else {
+            view.setupMovableMap();
+            updateRouteLocation();
+        }
+        view.setLocationSource(mapLocationSource);
+        showMyLocation();
+    }
+
+    void followingToggleOff(long timestamp) {
         following = false;
+        view.setToggleCaptionStatus(false);
         saveRoute(timestamp);
         view.clearPolyLine();
     }
 
     private void saveRoute(long timestamp) {
-        disposables.add(repository.insertRoute(new RouteDbEntity(timestamp))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess(this::saveLocations)
-                .subscribe());
+        if (locations.size() > 0) {
+            disposables.add(repository.insertRoute(new RouteDbEntity(timestamp))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSuccess(this::saveLocations)
+                    .subscribe());
+        }
     }
 
     private void saveLocations(long routeId) {
@@ -134,13 +223,33 @@ public class MainPresenter extends BasePresenter<MainView> {
         );
     }
 
-    void followingBegun() {
+    void followingToggleOn() {
         following = true;
+        view.setToggleCaptionStatus(true);
     }
 
-    public void onItemScreenSelected(int position) {
+    public void itemScreenSelected(int position) {
         if (position == SAVED_ACTIVITY_POSITION) {
-            view.openSavedScreen();
+            if (routeId == NO_ROUTE_ID) {
+                view.openSavedScreen();
+            } else {
+                view.goBack();
+            }
+        } else if (position == MAIN_ACTIVITY_POSITION) {
+            if (routeId != NO_ROUTE_ID) {
+                clear();
+                onCreate(NO_ROUTE_ID);
+            }
         }
+    }
+
+    private void clear() {
+        view.clearPolyLine();
+    }
+
+    @Override
+    public void detachView() {
+        view.clearPolyLine();
+        super.detachView();
     }
 }

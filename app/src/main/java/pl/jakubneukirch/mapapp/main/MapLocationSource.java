@@ -6,10 +6,12 @@ import com.google.android.gms.maps.LocationSource;
 
 public class MapLocationSource implements LocationSource {
 
-    private OnLocationChangedListener listener;
+    private OnLocationChangedListener listener = null;
 
     public void updateLocation(Location location) {
-        listener.onLocationChanged(location);
+        if (listener != null) {
+            listener.onLocationChanged(location);
+        }
     }
 
     @Override
@@ -18,5 +20,6 @@ public class MapLocationSource implements LocationSource {
     }
 
     @Override
-    public void deactivate() {}
+    public void deactivate() {
+    }
 }

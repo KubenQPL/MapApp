@@ -21,7 +21,10 @@ import pl.jakubneukirch.mapapp.data.model.dto.RouteDto;
 
 public class SavedRecyclerAdapter extends RecyclerView.Adapter<SavedRecyclerAdapter.ViewHolder> {
 
+    private RecyclerView recyclerView;
+
     private List<RouteDto> list = new ArrayList<>();
+    private OnItemClickListener onItemClickListener = new OnRecyclerItemClickListener();
 
     class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.mapImageView) ImageView mapImageView;
@@ -34,12 +37,13 @@ public class SavedRecyclerAdapter extends RecyclerView.Adapter<SavedRecyclerAdap
             ButterKnife.bind(this, itemView);
         }
 
-        void bind(String mapImageUrl, String date, int points){
+        void bind(int position, String mapImageUrl, String date, int points) {
             Picasso.get()
                     .load(mapImageUrl)
                     .into(mapImageView);
             dateTextView.setText(date);
             pointsTextView.setText(itemView.getContext().getString(R.string.points, points));
+            itemView.setOnClickListener((View view) -> onItemClickListener.onItemClick(recyclerView, itemView, position, itemView.getId()));
         }
     }
 
@@ -53,12 +57,13 @@ public class SavedRecyclerAdapter extends RecyclerView.Adapter<SavedRecyclerAdap
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String date;
-        try{
+        try {
             date = CalendarUtils.getStringDate(list.get(position).getTimestamp());
-        }catch (Exception ex){
+        } catch (Exception ex) {
             date = "";
         }
         holder.bind(
+                position,
                 list.get(position).getMapImageUrl(),
                 date,
                 list.get(position).getLocations().size()
@@ -70,11 +75,38 @@ public class SavedRecyclerAdapter extends RecyclerView.Adapter<SavedRecyclerAdap
         return list.size();
     }
 
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+        super.onAttachedToRecyclerView(recyclerView);
+    }
+
     public List<RouteDto> getList() {
         return list;
     }
 
     public void setList(List<RouteDto> list) {
         this.list = list;
+        notifyDataSetChanged();
+    }
+
+    public OnItemClickListener getOnItemClickListener() {
+        return onItemClickListener;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    class OnRecyclerItemClickListener implements OnItemClickListener {
+
+        @Override
+        public void onItemClick(RecyclerView parent, View view, int position, long id) {
+
+        }
+    }
+
+    interface OnItemClickListener {
+        public void onItemClick(RecyclerView parent, View view, int position, long id);
     }
 }

@@ -18,6 +18,7 @@ import static pl.jakubneukirch.mapapp.main.MainPresenter.MAIN_ACTIVITY_POSITION;
 public class SavedPresenter extends BasePresenter<SavedView> {
 
     private MapRepository repository;
+    private List<RouteDto> routes = null;
 
     @Inject
     public SavedPresenter(MapRepository repository) {
@@ -29,8 +30,8 @@ public class SavedPresenter extends BasePresenter<SavedView> {
         loadRoutes();
     }
 
-    public void onItemScreenSelected(int position) {
-        if(position == MAIN_ACTIVITY_POSITION){
+    public void itemScreenSelected(int position) {
+        if (position == MAIN_ACTIVITY_POSITION) {
             view.goBack();
         }
     }
@@ -39,11 +40,18 @@ public class SavedPresenter extends BasePresenter<SavedView> {
         disposables.add(repository.getAllRoutesWithLocations()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess((List<RouteLocationsDbEntity> list) -> {
-                    view.setRoutes(mapAllRoutes(list));
-                })
+                .doOnSuccess((List<RouteLocationsDbEntity> list) -> setupRoutes(mapAllRoutes(list)))
                 .subscribe()
         );
+    }
+
+    private void setupRoutes(List<RouteDto> list) {
+        this.routes = list;
+        view.setRoutes(list);
+    }
+
+    public void routeSelected(int position) {
+        view.openRoute(routes.get(position).getId());
     }
 
     private List<RouteDto> mapAllRoutes(List<RouteLocationsDbEntity> routes) {

@@ -74,7 +74,7 @@ public class SpinnerButton extends AppCompatSpinner {
     }
 
     private void setup() {
-        if(Build.VERSION.SDK_INT >= 23){
+        if (Build.VERSION.SDK_INT >= 23) {
             setPopupBackgroundDrawable(null);
         } else {
             loadForegroundDrawable();
@@ -90,7 +90,9 @@ public class SpinnerButton extends AppCompatSpinner {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        foregroundDrawable.setState(getDrawableState());
+        if (foregroundDrawable != null) {
+            foregroundDrawable.setState(getDrawableState());
+        }
         invalidate();
     }
 
@@ -163,8 +165,10 @@ public class SpinnerButton extends AppCompatSpinner {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         final Display display = ((WindowManager) getContext().getSystemService(Service.WINDOW_SERVICE)).getDefaultDisplay();
         display.getSize(displaySize);
-        setDropDownWidth(displaySize.x);
-        foregroundDrawable.setBounds(0,0,getWidth(), getHeight());
+        setDropDownWidth(displaySize.x - (2 * (int) this.getX()));
+        if (foregroundDrawable != null) {
+            foregroundDrawable.setBounds(0, 0, getWidth(), getHeight());
+        }
     }
 
     public void setExpanded(boolean expanded) {

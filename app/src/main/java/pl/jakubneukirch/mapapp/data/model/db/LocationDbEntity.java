@@ -15,11 +15,11 @@ public class LocationDbEntity {
     @ColumnInfo(name = "route_id")
     private long routeId;
 
-    private double lat;
+    private float lat;
 
-    private double lon;
+    private float lon;
 
-    public LocationDbEntity(long routeId, double lat, double lon) {
+    public LocationDbEntity(long routeId, float lat, float lon) {
         this.routeId = routeId;
         this.lat = lat;
         this.lon = lon;
@@ -57,19 +57,19 @@ public class LocationDbEntity {
         this.routeId = routeId;
     }
 
-    public double getLat() {
+    public float getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
+    public void setLat(float lat) {
         this.lat = lat;
     }
 
-    public double getLon() {
+    public float getLon() {
         return lon;
     }
 
-    public void setLon(double lon) {
+    public void setLon(float lon) {
         this.lon = lon;
     }
 }

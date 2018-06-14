@@ -21,6 +21,8 @@ import pl.jakubneukirch.mapapp.di.ActivityModule;
 import pl.jakubneukirch.mapapp.main.MainActivity;
 import pl.jakubneukirch.mapapp.view.SpinnerButton;
 
+import static pl.jakubneukirch.mapapp.main.MainActivity.KEY_ROUTE_ID;
+
 public class SavedActivity extends BaseActivity<SavedView, SavedPresenter> implements SavedView {
 
     @BindView(R.id.savedToolbar)
@@ -48,6 +50,7 @@ public class SavedActivity extends BaseActivity<SavedView, SavedPresenter> imple
     }
 
     private void setupRecyclerView() {
+        adapter.setOnItemClickListener((parent, view, position, id) -> presenter.routeSelected(position));
         savedRecyclerView.setAdapter(adapter);
         savedRecyclerView.setLayoutManager(
                 new LinearLayoutManager(
@@ -63,12 +66,20 @@ public class SavedActivity extends BaseActivity<SavedView, SavedPresenter> imple
         spinnerButton.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                presenter.onItemScreenSelected(position);
+                presenter.itemScreenSelected(position);
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
+    }
+
+    @Override
+    public void openRoute(long routeId) {
+        final Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(KEY_ROUTE_ID, routeId);
+        startActivity(intent);
     }
 
     @Override

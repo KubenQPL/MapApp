@@ -11,12 +11,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
-import android.widget.ToggleButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,38 +32,56 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import pl.jakubneukirch.mapapp.R;
 import pl.jakubneukirch.mapapp.app.MapApp;
 import pl.jakubneukirch.mapapp.base.BaseActivity;
+import pl.jakubneukirch.mapapp.data.model.api.PlaceDetails;
+import pl.jakubneukirch.mapapp.data.model.db.LocationDbEntity;
 import pl.jakubneukirch.mapapp.di.ActivityModule;
 import pl.jakubneukirch.mapapp.saved.SavedActivity;
+import pl.jakubneukirch.mapapp.view.InfoDialog;
 import pl.jakubneukirch.mapapp.view.SpinnerButton;
 
 public class MainActivity extends BaseActivity<MainView, MainPresenter> implements MainView, OnMapReadyCallback {
 
     public static final int CODE_PERMISSION_FINE_LOCATION = 0;
 
+    private static final int CAMERA_ZOOM = 16;
+    public static final String KEY_ROUTE_ID = "route_id";
+    public static final int NO_ROUTE_ID = -1;
+
     @BindView(R.id.mapToolbar)
     Toolbar standardToolbar;
-    @BindView(R.id.followToggleButton)
-    ToggleButton followToggleButton;
     @BindView(R.id.spinnerButton)
     SpinnerButton spinnerButton;
+    @BindView(R.id.toggleLayout)
+    LinearLayout toggleLayout;
+    @BindView(R.id.followToggleButton)
+    SwitchCompat followToggleButton;
+    @BindView(R.id.followingStatusTextView)
+    TextView followingStatusTextView;
 
     private GoogleMap map;
     private AlertDialog permissionDialog = null;
     private AlertDialog providerDialog = null;
+    private InfoDialog infoDialog = null;
 
     private Polyline polyline = null;
     private PolylineOptions polylineOptions = null;
+
+    private boolean showInfoMenu = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        presenter.onCreate();
+        long routeId = getIntent().getLongExtra(KEY_ROUTE_ID, NO_ROUTE_ID);
+        presenter.onCreate(routeId);
     }
 
     @Override
@@ -71,6 +93,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @Override
     public void setup() {
         ButterKnife.bind(this);
+        checkPermissions();
         setupToolbar();
         setupMap();
         setupListeners();
@@ -82,11 +105,12 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         spinnerButton.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                presenter.onItemScreenSelected(position);
+                presenter.itemScreenSelected(position);
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
     }
 
@@ -109,9 +133,9 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     private void setupListeners() {
         followToggleButton.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
             if (isChecked) {
-                presenter.followingBegun();
+                presenter.followingToggleOn();
             } else {
-                presenter.followingEnded(System.currentTimeMillis());
+                presenter.followingToggleOff(System.currentTimeMillis());
             }
         });
     }
@@ -168,8 +192,8 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     @SuppressLint("MissingPermission")
     @Override
-    public void showMyLocation() {
-        if (map != null && isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+    public void showMyLocation(boolean show) {
+        if (map != null && isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION) && show) {
             map.setMyLocationEnabled(true);
             updateCameraZoom();
         }
@@ -182,22 +206,65 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     @Override
     public void setLocation(Location location) {
-        final LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-        final CameraUpdate update = CameraUpdateFactory.newLatLng(position);
-        updateCameraZoom();
-        map.moveCamera(update);
+        setCameraPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+    }
+
+    @Override
+    public void setLocation(LocationDbEntity location) {
+        setCameraPosition(new LatLng(location.getLat(), location.getLon()));
     }
 
     @Override
     public void drawPolyLine(Location location) {
-        if (polylineOptions == null) {
-            setupPolyLineOptions();
-        }
+        drawPolyLine(location.getLatitude(), location.getLongitude());
+    }
+
+    @Override
+    public void drawPolyLine(LocationDbEntity location) {
+        drawPolyLine(location.getLat(), location.getLon());
+    }
+
+    @Override
+    public void drawPolyLine(double lat, double lon) {
         if (polyline != null) {
             polyline.remove();
         }
-        polylineOptions.add(new LatLng(location.getLatitude(), location.getLongitude()));
+        if (polylineOptions == null) {
+            setupPolyLineOptions();
+        }
+        polylineOptions.add(new LatLng(lat, lon));
         polyline = map.addPolyline(polylineOptions);
+    }
+
+    @Override
+    public void drawPath(List<LocationDbEntity> list) {
+        if (polyline != null) {
+            polyline.remove();
+        }
+        if (polylineOptions == null) {
+            setupPolyLineOptions();
+        }
+        for (LocationDbEntity loc : list) {
+            polylineOptions.add(new LatLng(loc.getLat(), loc.getLon()));
+        }
+        if (map != null) {
+            polyline = map
+                    .addPolyline(
+                            polylineOptions
+                    );
+            if (polyline.getPoints().size() > 0) {
+                setCameraPosition(polyline.getPoints().get(0));
+            }
+
+        }
+    }
+
+    private void setCameraPosition(LatLng position) {
+        if(map != null){
+            Log.d("location", position.toString());
+            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(position, CAMERA_ZOOM);
+            map.animateCamera(update);
+        }
     }
 
     private void setupPolyLineOptions() {
@@ -209,7 +276,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     @Override
     public void clearPolyLine() {
-        if(polyline != null){
+        if (polyline != null) {
             polyline.remove();
             polyline = null;
             polylineOptions = null;
@@ -242,14 +309,80 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
-        map.getUiSettings().setScrollGesturesEnabled(false);
-        map.getUiSettings().setZoomControlsEnabled(false);
-        map.getUiSettings().setZoomGesturesEnabled(false);
         presenter.mapLoaded();
     }
 
+    @Override
+    public void setupMovableMap() {
+        map.getUiSettings().setScrollGesturesEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map.getUiSettings().setZoomGesturesEnabled(true);
+    }
+
+    @Override
+    public void setupStaticMap() {
+        map.getUiSettings().setScrollGesturesEnabled(false);
+        map.getUiSettings().setZoomControlsEnabled(false);
+        map.getUiSettings().setZoomGesturesEnabled(false);
+    }
+
     private void updateCameraZoom() {
-        final CameraUpdate zoom = CameraUpdateFactory.zoomTo(18);
+        final CameraUpdate zoom = CameraUpdateFactory.zoomTo(CAMERA_ZOOM);
         map.animateCamera(zoom);
+    }
+
+    @Override
+    public void setupFollowingToolbar() {
+        if (toggleLayout != null) {
+            toggleLayout.setVisibility(View.VISIBLE);
+        }
+        showInfoMenu = false;
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public void setupInfoToolbar() {
+        if (toggleLayout != null) {
+            toggleLayout.setVisibility(View.GONE);
+        }
+        showInfoMenu = true;
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public void goBack() {
+        onBackPressed();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (showInfoMenu) {
+            getMenuInflater().inflate(R.menu.menu_info, menu);
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.infoMenuItem) {
+            presenter.infoItemClicked();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void showPlaces(ArrayList<PlaceDetails> places) {
+        if (infoDialog == null) {
+            infoDialog = new InfoDialog(this);
+        }
+        infoDialog.setInfo(places);
+        infoDialog.setCancelable(true);
+        infoDialog.show();
+    }
+
+    @Override
+    public void setToggleCaptionStatus(boolean on) {
+        followingStatusTextView.setText(on ? getString(R.string.following) : getString(R.string.follow));
     }
 }

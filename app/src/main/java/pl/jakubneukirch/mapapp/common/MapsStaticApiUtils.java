@@ -18,13 +18,13 @@ public class MapsStaticApiUtils {
         builder.append(BASE_URL);
         builder.append("path=");
         LocationDbEntity location;
-        for(int i = 0; i < locations.size(); i++){
+        for (int i = 0; i < locations.size(); i++) {
             location = locations.get(i);
             Log.d("loc", location.getRouteId() + " " + location.getLat() + " " + location.getLon());
             builder.append(location.getLat());
             builder.append(",");
             builder.append(location.getLon());
-            if(i < locations.size() -1){
+            if (i < locations.size() - 1) {
                 builder.append("|");
             }
         }

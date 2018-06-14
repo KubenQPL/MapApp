@@ -7,5 +7,6 @@ import pl.jakubneukirch.mapapp.saved.SavedActivity;
 @Subcomponent(modules = {ActivityModule.class})
 public interface ActivityComponent {
     void inject(MainActivity activity);
+
     void inject(SavedActivity activity);
 }

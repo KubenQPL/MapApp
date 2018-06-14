@@ -1,4 +1,4 @@
-package pl.jakubneukirch.mapapp.main;
+package pl.jakubneukirch.mapapp.saved;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,8 +15,6 @@ import io.reactivex.Single;
 import pl.jakubneukirch.mapapp.RxSchedulersOverrideRule;
 import pl.jakubneukirch.mapapp.data.MapRepository;
 import pl.jakubneukirch.mapapp.data.model.db.RouteLocationsDbEntity;
-import pl.jakubneukirch.mapapp.saved.SavedPresenter;
-import pl.jakubneukirch.mapapp.saved.SavedView;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -65,14 +63,14 @@ public class SavedScreenTest {
 
     @Test
     public void shouldGoBack() {
-        presenter.onItemScreenSelected(MAIN_ACTIVITY_POSITION);
+        presenter.itemScreenSelected(MAIN_ACTIVITY_POSITION);
 
         verify(view).goBack();
     }
 
     @Test
     public void shouldDoNothing(){
-        presenter.onItemScreenSelected(SAVED_ACTIVITY_POSITION);
+        presenter.itemScreenSelected(SAVED_ACTIVITY_POSITION);
 
         verify(view, never()).goBack();
     }

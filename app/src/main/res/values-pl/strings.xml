@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MapApp</string>
+    <string name="test">Test</string>
+    <string name="title_activity_maps">Mapa</string>
+    <string name="following">Śledzenie</string>
+    <string name="follow">Śledź trasę</string>
+    <string name="permission_needed">Przyznanie zezwoleń jest wymagane do poprawnego działania aplikacji.</string>
+    <string name="ask_again">Poproś</string>
+    <string name="exit">Wyjdź</string>
+    <string name="gps_needed">Gps jest potrzebny do uzyskania twojej lokalizacji.</string>
+    <string name="turn_on">Włącz</string>
+    <string name="map_screen">Ekran mapy</string>
+    <string name="saved_routes_screen">Zapisane trasy</string>
+    <string name="info_title">Szczegóły trasy</string>
+    <string name="start_position">Pozycja początkowa</string>
+    <string name="end_position">Pozycja końcowa</string>
+    <string name="address">Adres:</string>
+    <string name="on">Włącz</string>
+    <string name="off">Wyłącz</string>
+    <string name="points">Punkty: %d</string>
+    <string-array name="spinner_screens">
+        <item>Aktualna lokalizacja</item>
+        <item>Zapisane trasy</item>
+    </string-array>
+
+    <string name="no_name">Brak informacji</string>
+    <string name="no_address">Brak adresu</string>
+</resources>
